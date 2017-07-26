@@ -1,0 +1,2 @@
+# core
+.Net Core testing
