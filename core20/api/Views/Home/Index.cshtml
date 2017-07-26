@@ -1,0 +1,21 @@
+﻿@model IEnumerable<api.Models.Restaurant>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Home/Index</title>
+</head>
+<body>
+    <h1>Welcom</h1>
+    
+    <table>
+        @foreach(var restaurant in Model)
+        {
+            <tr>
+                <td>@restaurant.Id</td>
+                <td>@restaurant.Name</td>
+            </tr>
+        }
+    </table>
+
+</body>
+</html>
