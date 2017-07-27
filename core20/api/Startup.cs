@@ -14,22 +14,25 @@ namespace api
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; set; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSingleton(Configuration);
+
+            services.Configure<AppSettings>(Configuration);
+
             //one instances of the service for the entire application, so every method, and every component will have the same object injected
             services.AddSingleton<IGreeter, Greeter>();
+
             //one instance of the service for each http request
             services.AddScoped<IRestaurantData, InMemoryRestaurantData>();
         }

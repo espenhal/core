@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +13,16 @@ namespace api.Services
     }
     public class Greeter : IGreeter
     {
-        private string _greeting;
+        private readonly AppSettings _appSettings;
 
-        public Greeter(IConfiguration configuration)
+        public Greeter(IOptions<AppSettings> appSettings)
         {
-            _greeting = configuration["Greeting"];
+            _appSettings = appSettings.Value;
         }
 
         public string GetGreeting()
         {
-            return _greeting;
+            return _appSettings.Greeting;
         }
     }
 }
