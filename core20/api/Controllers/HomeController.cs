@@ -1,4 +1,5 @@
-﻿using api.Services;
+﻿using api.Entities;
+using api.Services;
 using api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,33 @@ namespace api.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(RestaurantEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var newRestaurant = new Restaurant
+                {
+                    Cuisine = model.Cuisine,
+                    Name = model.Name
+                };
+
+                newRestaurant = _restaurantData.Add(newRestaurant);
+
+                //return View("Details", newRestaurant); // use POST - redirect - GET Pattern instead
+                return RedirectToAction("Details", new { id = newRestaurant.Id });
+            }
+
+            return View();
         }
     }
 }
