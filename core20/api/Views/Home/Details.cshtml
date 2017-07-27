@@ -1,0 +1,9 @@
+﻿@using api.Controllers
+@model api.Entities.Restaurant
+
+<h1>@Model.Name</h1>
+
+<div>... details ...</div>
+<div>
+    @Html.ActionLink("Home", nameof(HomeController.Index))
+</div>

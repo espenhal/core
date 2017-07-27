@@ -1,4 +1,4 @@
-﻿namespace api.Models
+﻿namespace api.Entities
 {
     public class Restaurant
     {
