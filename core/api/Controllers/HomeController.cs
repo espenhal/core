@@ -10,24 +10,24 @@ namespace api.Controllers
     {
         private IRestaurantData _restaurantData;
         private IGreeter _greeter;
-        private ILogger _logger;
 
-        public HomeController(IRestaurantData restaurantData, IGreeter greeter, ILogger logger)
+        public HomeController(IRestaurantData restaurantData, IGreeter greeter)
         {
             _restaurantData = restaurantData;
             _greeter = greeter;
-            _logger = logger;
         }
 
         public IActionResult Index()
         {
-            _logger.Information("Home!");
+            //Log.Information("Home!");
 
             //var model = new Restaurant { Id = 1, Name = "The Restaurant" };
             //var model = _restaurantData.GetAll();
             var model = new HomePageViewModel();
             model.Restaurants = _restaurantData.GetAll();
             model.CurrentMessage = _greeter.GetGreeting();
+
+            HttpContext.Response.Cookies.Append("CustomCookie", "It's worth a lot!");
 
             //return new ObjectResult(model);
             return View(model);
@@ -37,7 +37,7 @@ namespace api.Controllers
 
         public IActionResult Details(int id)
         {
-            _logger.Information("Details!");
+            //Log.Information("Details!");
 
             var model = _restaurantData.Get(id);
 
@@ -53,7 +53,7 @@ namespace api.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            _logger.Information("Create Get!");
+            //Log.Information("Create Get!");
 
             return View();
         }
@@ -62,7 +62,7 @@ namespace api.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(RestaurantEditViewModel model)
         {
-            _logger.Information("Create Post!");
+            //Log.Information("Create Post!");
 
             if (ModelState.IsValid)
             {

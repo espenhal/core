@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <header>
+        @Html.ActionLink("Home", "Index", "Home")
+        @Html.ActionLink("Address", "Address", "About")
+        @Html.ActionLink("Phone", "Phone", "About")
+    </header>
+    <div>
+        @RenderBody()
+    </div>
+    <footer>
+        @RenderSection("footer", required: false)
+        @*@DateTime.Now.Year*@
+    </footer>
+</body>
+</html>

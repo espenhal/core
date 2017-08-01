@@ -1,19 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using api.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Routing;
-using api.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using api.Middleware;
 
 namespace api
 {
     public class Startup
     {
-        //public IConfiguration Configuration { get; }
         public IConfigurationRoot Configuration { get; }
 
         public Startup(IHostingEnvironment env)
@@ -21,9 +19,14 @@ namespace api
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(Configuration)
+                .CreateLogger();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -32,13 +35,11 @@ namespace api
         {
             services.AddMvc();
 
-            services.Configure<AppSettings>(Configuration);
+            //one instance of the service for each http request
+            services.AddScoped<IRestaurantData, InMemoryRestaurantData>();
 
             //one instances of the service for the entire application, so every method, and every component will have the same object injected
             services.AddSingleton<IGreeter, Greeter>();
-
-            //one instance of the service for each http request
-            services.AddScoped<IRestaurantData, InMemoryRestaurantData>();
 
             services.AddSingleton<Serilog.ILogger>(new LoggerConfiguration()
                 .ReadFrom.Configuration(Configuration)
@@ -46,9 +47,15 @@ namespace api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime appLifetime)
         {
             loggerFactory.AddSerilog();
+            //loggerFactory.AddDebug();
+
+            // Ensure any buffered events are sent at shutdown
+            appLifetime.ApplicationStopped.Register(Log.CloseAndFlush);
+            
+            app.UseSerilogCustomEnricher();
 
             if (env.IsDevelopment())
             {
@@ -57,7 +64,6 @@ namespace api
             }
             else
             {
-                //app.UseExceptionHandler("/error");
                 app.UseExceptionHandler(new ExceptionHandlerOptions
                 {
                     //ExceptionHandlingPath = "/error"
@@ -65,24 +71,14 @@ namespace api
                 });
             }
 
-            app.UseSerilogCustomEnricher();
-
-            //both UseDefaultFiles and UseStaticFiles
             app.UseFileServer();
-            //app.UseDefaultFiles();
-            //app.UseStaticFiles();
 
-            //app.UseWelcomePage(new WelcomePageOptions {
-            //    Path = "/welcome"
-            //});
-
-            //app.Run(async (context) =>
+            //app.UseMvc(routes =>
             //{
-            //    var message = greeter.GetGreeting();
-            //    await context.Response.WriteAsync(message);
+            //    routes.MapRoute(
+            //        name: "default",
+            //        template: "{controller=Home}/{action=Index}/{id?}");
             //});
-
-            //app.UseMvcWithDefaultRoute();
             app.UseMvc(ConfigureRoutes);
 
             app.Run(ctx => ctx.Response.WriteAsync("Not found"));
@@ -90,8 +86,7 @@ namespace api
 
         private void ConfigureRoutes(IRouteBuilder routeBuilder)
         {
-            routeBuilder.MapRoute("Default",
-                "{controller=Home}/{action=Index}/{id?}");
+            routeBuilder.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
         }
     }
 }
