@@ -1,0 +1,29 @@
+﻿@model api.ViewModels.HomePageViewModel
+
+@{
+    ViewBag.Title = "Home";
+    //Layout = "~/Views/Shared/_Layout.cshtml"; // use _ViewStart.cshtml
+}
+
+<h1>Welcome!</h1>
+<table>
+    @foreach (var restaurant in Model.Restaurants)
+    {
+        <tr>
+            @*<td>@restaurant.Id</td>*@
+            <td>
+                @*<a href="/home/details/@restaurant.Id">Details</a>*@
+                @Html.ActionLink("View", "Details", new { id = restaurant.Id })
+            </td>
+            <td>@restaurant.Name</td>
+        </tr>
+    }
+</table>
+<div>
+    @Html.ActionLink("Create", "Create")
+</div>
+
+
+@section footer {
+    <h3>@Model.CurrentMessage</h3>
+}
