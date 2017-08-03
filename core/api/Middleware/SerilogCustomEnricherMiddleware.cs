@@ -44,18 +44,7 @@ namespace api
 
             try
             {
-                using (var memStream = new MemoryStream())
-                {
-                    httpContext.Response.Body = memStream;
-
-                    await _next(httpContext);
-
-                    memStream.Position = 0;
-                    string responseBody = new StreamReader(memStream).ReadToEnd();
-
-                    memStream.Position = 0;
-                    await memStream.CopyToAsync(originalBody);
-                }
+                await _next(httpContext);
                 sw.Stop();
 
                 var statusCode = httpContext.Response?.StatusCode;
@@ -67,10 +56,6 @@ namespace api
             }
             // Never caught, because `LogException()` returns false.
             catch (Exception ex) when (LogException(httpContext, sw, ex)) { }
-            finally
-            {
-                httpContext.Response.Body = originalBody;
-            }
         }
 
         static bool LogException(HttpContext httpContext, Stopwatch sw, Exception ex)
